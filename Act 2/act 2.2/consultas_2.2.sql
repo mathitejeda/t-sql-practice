@@ -2,49 +2,179 @@ use BluePrint
 
 GO
 
---1 Por cada cliente listar razón social, cuit y nombre del tipo de cliente.
+--1 Por cada cliente listar razï¿½n social, cuit y nombre del tipo de cliente.
 
-select Clientes.RazonSocial,Clientes.Cuit, TiposCliente.Nombre from Clientes left join TiposCliente on Clientes.IDTipo = TiposCliente.ID
+select Clientes.RazonSocial, Clientes.Cuit, TiposCliente.Nombre
+from Clientes
+    left join TiposCliente on Clientes.IDTipo = TiposCliente.ID
 
---2 Por cada cliente listar razón social, cuit y nombre de la ciudad y nombre del país. Sólo de aquellos clientes que posean ciudad y país.
+--2 Por cada cliente listar razï¿½n social, cuit y nombre de la ciudad y nombre del paï¿½s. Sï¿½lo de aquellos clientes que posean ciudad y paï¿½s.
 
-select Clientes.RazonSocial, Clientes.Cuit, Ciudades.Nombre, Paises.Nombre from Clientes inner join ciudades on Clientes.IDCiudad = Ciudades.ID inner join Paises on Ciudades.IDPais = Paises.ID
+select Clientes.RazonSocial, Clientes.Cuit, Ciudades.Nombre, Paises.Nombre
+from Clientes
+    inner join ciudades on Clientes.IDCiudad = Ciudades.ID
+    inner join Paises on Ciudades.IDPais = Paises.ID
 
---3 Por cada cliente listar razón social, cuit y nombre de la ciudad y nombre del país. Listar también los datos de aquellos clientes que no tengan ciudad relacionada.
+--3 Por cada cliente listar razï¿½n social, cuit y nombre de la ciudad y nombre del paï¿½s. Listar tambiï¿½n los datos de aquellos clientes que no tengan ciudad relacionada.
 
-select Clientes.RazonSocial, Clientes.CUIT, Ciudades.Nombre, paises.Nombre from Clientes left join Ciudades on Clientes.IDCiudad = Ciudades.ID left join paises on Ciudades.IDPais = Paises.ID
+select Clientes.RazonSocial, Clientes.CUIT, Ciudades.Nombre, paises.Nombre
+from Clientes
+    left join Ciudades on Clientes.IDCiudad = Ciudades.ID
+    left join paises on Ciudades.IDPais = Paises.ID
 
---4 Por cada cliente listar razón social, cuit y nombre de la ciudad y nombre del país. Listar también los datos de aquellas ciudades y países que no tengan clientes relacionados.
+--4 Por cada cliente listar razï¿½n social, cuit y nombre de la ciudad y nombre del paï¿½s. Listar tambiï¿½n los datos de aquellas ciudades y paï¿½ses que no tengan clientes relacionados.
 
-select Clientes.RazonSocial, Clientes.CUIT, isnull(Ciudades.Nombre,'N/A') as 'ciudad', isnull(paises.Nombre,'N/A') as 'pais' 
-from Clientes 
-full join Ciudades on Clientes.IDCiudad = Ciudades.ID 
-full join paises on Ciudades.IDPais = Paises.ID
+select Clientes.RazonSocial, Clientes.CUIT, isnull(Ciudades.Nombre,'N/A') as 'ciudad', isnull(paises.Nombre,'N/A') as 'pais'
+from Clientes
+    full join Ciudades on Clientes.IDCiudad = Ciudades.ID
+    full join paises on Ciudades.IDPais = Paises.ID
 
---5 Listar los nombres de las ciudades que no tengan clientes asociados. Listar también el nombre del país al que pertenece la ciudad.
+--5 Listar los nombres de las ciudades que no tengan clientes asociados. Listar tambiï¿½n el nombre del paï¿½s al que pertenece la ciudad.
 
-select Ciudades.Nombre, paises.Nombre from Ciudades left join Clientes on Ciudades.ID = Clientes.IDCiudad 
-inner join Paises on Ciudades.IDPais = Paises.ID
+select Ciudades.Nombre, paises.Nombre
+from Ciudades left join Clientes on Ciudades.ID = Clientes.IDCiudad
+    inner join Paises on Ciudades.IDPais = Paises.ID
 where Clientes.IDCiudad is null
 
---6 Listar para cada proyecto el nombre del proyecto, el costo, la razón social del cliente, el nombre del tipo de cliente y el nombre de la ciudad (si la tieneregistrada) de aquellos clientes cuyo tipo de cliente sea 'Extranjero' o 'Unicornio'.
-select Proyectos.Nombre,Proyectos.CostoEstimado,Clientes.RazonSocial, TiposCliente.Nombre as 'tipo de cliente', coalesce(Ciudades.Nombre,'No registrado') as 'ciudad'
+--6 Listar para cada proyecto el nombre del proyecto, el costo, la razï¿½n social del cliente, el nombre del tipo de cliente y el nombre de la ciudad (si la tieneregistrada) de aquellos clientes cuyo tipo de cliente sea 'Extranjero' o 'Unicornio'.
+select Proyectos.Nombre, Proyectos.CostoEstimado, Clientes.RazonSocial, TiposCliente.Nombre as 'tipo de cliente', coalesce(Ciudades.Nombre,'No registrado') as 'ciudad'
 from Proyectos
-left join Clientes on Proyectos.IDCliente = Clientes.ID
-left join TiposCliente on TiposCliente.ID = Clientes.ID
-left join Ciudades on Clientes.IDCiudad = Ciudades.ID
+    left join Clientes on Proyectos.IDCliente = Clientes.ID
+    left join TiposCliente on TiposCliente.ID = Clientes.ID
+    left join Ciudades on Clientes.IDCiudad = Ciudades.ID
 where TiposCliente.Nombre in ('extranjero', 'unicornio')
 
---7 Listar los nombre de los proyectos de aquellos clientes que sean de los países 'Argentina' o 'Italia'.
---8 Listar para cada módulo el nombre del módulo, el costo estimado del módulo, el nombre del proyecto, la descripción del proyecto y el costo estimado del proyecto de todos aquellos proyectos que hayan finalizado.
---9 Listar los nombres de los módulos y el nombre del proyecto de aquellos módulos cuyo tiempo estimado de realización sea de más de 100 horas.
---10 Listar nombres de módulos, nombre del proyecto, descripción y tiempo estimado de aquellos módulos cuya fecha estimada de fin sea mayor a la fecha real de fin y el costo estimado del proyecto sea mayor a cien mil.
---11 Listar nombre de proyectos, sin repetir, que registren módulos que hayan finalizado antes que el tiempo estimado.
---12 Listar nombre de ciudades, sin repetir, que no registren clientes pero sí colaboradores.
---13 Listar el nombre del proyecto y nombre de módulos de aquellos módulos que contengan la palabra 'login' en su nombre o descripción.
---14 Listar el nombre del proyecto y el nombre y apellido de todos los colaboradores que hayan realizado algún tipo de tarea cuyo nombre contenga 'Programación' o 'Testing'. Ordenarlo por nombre de proyecto de manera ascendente.
---15 Listar nombre y apellido del colaborador, nombre del módulo, nombre del tipo de tarea, precio hora de la colaboración y precio hora base de aquellos colaboradores que hayan cobrado su valor hora de colaboración más del 50% del valor hora base.
---16 Listar nombres y apellidos de las tres colaboraciones de colaboradores externos que más hayan demorado en realizar alguna tarea cuyo nombre de tipo de tarea contenga 'Testing'.17 Listar apellido, nombre y mail de los colaboradores argentinos que sean internos y cuyo mail no contenga '.com'.
---18 Listar nombre del proyecto, nombre del módulo y tipo de tarea de aquellas tareas realizadas por colaboradores externos.
+--7 Listar los nombre de los proyectos de aquellos clientes que sean de los paï¿½ses 'Argentina' o 'Italia'.
+select Proyectos.Nombre
+from Proyectos
+    left join Clientes on Proyectos.IDCliente = Clientes.ID
+    left join Ciudades on Clientes.IDCiudad = Ciudades.ID
+where Ciudades.IDPais = 1 or Ciudades.IDPais = 5
+
+--8 Listar para cada mï¿½dulo el nombre del mï¿½dulo, el costo estimado del mï¿½dulo, el nombre del proyecto, la descripciï¿½n del proyecto y el costo estimado del proyecto de todos aquellos proyectos que hayan finalizado.
+select Modulos.Nombre, Modulos.CostoEstimado as 'Costo estimado modulo', Proyectos.Nombre, Proyectos.Descripcion, Proyectos.CostoEstimado as 'Costo Estimado Proyecto'
+from Modulos
+    left join proyectos on Modulos.IDProyecto = Proyectos.ID
+where Proyectos.Estado = 1
+
+--9 Listar los nombres de los mï¿½dulos y el nombre del proyecto de aquellos mï¿½dulos cuyo tiempo estimado de realizaciï¿½n sea de mï¿½s de 100 horas.
+
+select Modulos.Nombre, Proyectos.Nombre
+from Modulos
+    left join Proyectos on Modulos.IDProyecto = Proyectos.ID
+where Modulos.TiempoEstimado > 100
+
+--10 Listar nombres de mï¿½dulos, nombre del proyecto, descripciï¿½n y tiempo estimado de aquellos mï¿½dulos cuya fecha estimada de fin sea mayor a la fecha real de fin y el costo estimado del proyecto sea mayor a cien mil.
+
+select Modulos.Nombre, Proyectos.Nombre, Proyectos.Descripcion, Proyectos.CostoEstimado
+from Modulos
+    left join Proyectos on Modulos.IDProyecto = Proyectos.ID
+where Modulos.FechaEstimadaFin > Modulos.FechaFin and Proyectos.CostoEstimado > 100000
+
+--11 Listar nombre de proyectos, sin repetir, que registren mï¿½dulos que hayan finalizado antes que el tiempo estimado.
+
+select distinct(Proyectos.Nombre)
+from Proyectos
+    INNER join modulos on Proyectos.ID = Modulos.IDProyecto
+where Modulos.FechaFin < FechaEstimadaFin
+
+--12 Listar nombre de ciudades, sin repetir, que no registren clientes pero sï¿½ colaboradores.
+
+select distinct(Ciudades.Nombre)
+from Ciudades
+    full join Clientes on Clientes.IDCiudad = Ciudades.ID
+    full join Colaboradores on Colaboradores.IDCiudad = Ciudades.ID
+where Clientes.IDCiudad IS NULL and Colaboradores.IDCiudad IS NOT NULL
+
+
+--13 Listar el nombre del proyecto y nombre de mï¿½dulos de aquellos mï¿½dulos que contengan la palabra 'login' en su nombre o descripciï¿½n.
+
+select Proyectos.Nombre, Modulos.Nombre, Modulos.Descripcion
+FROM Proyectos
+    inner join Modulos on Modulos.IDProyecto = Proyectos.ID
+where Modulos.Descripcion like '%login%'
+
+--14 Listar el nombre del proyecto y el nombre y apellido de todos los colaboradores que hayan realizado algï¿½n tipo de tarea 
+--cuyo nombre contenga 'Programaciï¿½n' o 'Testing'. Ordenarlo por nombre de proyecto de manera ascendente.
+
+SELECT Proyectos.Nombre as 'Proyecto', Colaboradores.Nombre as 'Nombre Colaborador', Colaboradores.Apellido as 'Apellido colaborador', TiposTarea.Nombre
+from Proyectos
+    INNER join Modulos on Proyectos.ID = Modulos.IDProyecto --Para poder acceder a las tareas
+    INNER JOIN Tareas on Modulos.ID = Tareas.IDModulo --Para poder acceder a las colaboraciones
+    INNER join TiposTarea on Tareas.IDTipo = TiposTarea.ID
+    INNER join Colaboraciones on Tareas.IDModulo = Colaboraciones.IDColaborador --Para poder acceder a los colaboradores
+    INNER join Colaboradores on Colaboraciones.IDColaborador = Colaboradores.ID
+where TiposTarea.Nombre like '%Programacion%' or TiposTarea.Nombre like '%testing%'
+order by Proyectos.Nombre ASC
+
+--15 Listar nombre y apellido del colaborador, nombre del mï¿½dulo, nombre del tipo de tarea, precio hora de la colaboraciï¿½n y precio hora 
+--base de aquellos colaboradores que hayan cobrado su valor hora de colaboraciï¿½n mï¿½s del 50% del valor hora base.
+
+select
+    Colaboradores.Nombre + ', '+ Colaboradores.Apellido as 'colaborador',
+    Modulos.Nombre,
+    TiposTarea.Nombre,
+    Colaboraciones.PrecioHora,
+    TiposTarea.PrecioHoraBase
+from Colaboradores
+    inner join Colaboraciones on Colaboraciones.IDColaborador = Colaboradores.ID
+    inner join Tareas on Colaboraciones.IDTarea = Colaboradores.ID
+    inner join TiposTarea on Tareas.IDTipo = TiposTarea.ID
+    inner join Modulos on tareas.IDModulo = Modulos.ID
+where Colaboraciones.IDTarea = 2
+--Lo deje ahi porque la consigna es poco clara
+
+/*16 Listar nombres y apellidos de las tres colaboraciones de colaboradores externos que mï¿½s hayan demorado en realizar alguna tarea cuyo 
+nombre de tipo de tarea contenga 'Testing'.*/
+select
+    top 3
+    Colaboraciones.Tiempo,
+    Colaboradores.Nombre + ',' + Colaboradores.Apellido as 'Colaborador',
+    Colaboraciones.Tiempo as 'Tiempo'
+from Colaboradores
+    inner join Colaboraciones on Colaboradores.ID = Colaboraciones.IDColaborador
+    inner join tareas on Colaboraciones.IDTarea = Tareas.ID
+    inner join TiposTarea on tareas.IDTipo = TiposTarea.ID
+where Colaboradores.Tipo = 'E' and TiposTarea.Nombre like '%testing%'
+
+--17 Listar apellido, nombre y mail de los colaboradores argentinos que sean internos y cuyo mail no contenga '.com'.
+select
+    Colaboradores.Apellido + ', '+Colaboradores.Nombre as 'colaboradores',
+    Colaboradores.EMail
+from Colaboradores
+    inner join Ciudades on Colaboradores.IDCiudad = Ciudades.ID
+where Ciudades.IDPais = 1 and Colaboradores.EMail not like '%.com'
+--18 Listar nombre del proyecto, nombre del mï¿½dulo y tipo de tarea de aquellas tareas realizadas por colaboradores externos.
+
+SELECT
+    Proyectos.Nombre,
+    Modulos.Nombre,
+    TiposTarea.Nombre
+FROM Proyectos
+    INNER JOIN Modulos on Modulos.IDProyecto = Proyectos.ID
+    INNER JOIN tareas on Tareas.IDModulo = Modulos.ID
+    INNER JOIN TiposTarea on TiposTarea.ID = Tareas.IDTipo
+    INNER join Colaboraciones on Colaboraciones.IDTarea = Tareas.ID
+    INNER JOIN colaboradores on Colaboraciones.IDColaborador = Colaboradores.ID
+WHERE Colaboradores.Tipo = 'E'
+
 --19 Listar nombre de proyectos que no hayan registrado tareas.
---20 Listar apellidos y nombres, sin repeticiones, de aquellos colaboradores que hayan trabajado en algún proyecto que aún no haya finalizado
+
+select
+    Proyectos.Nombre
+from Proyectos
+    LEFT JOIN Modulos on Modulos.IDProyecto = Proyectos.ID
+    LEFT JOIN tareas on tareas.IDModulo = Modulos.ID
+where Tareas.IDModulo IS NULL
+
+--20 Listar apellidos y nombres, sin repeticiones, de aquellos colaboradores que hayan trabajado en algï¿½n proyecto que aï¿½n no haya 
+--finalizado
+
+select
+    distinct(Colaboradores.Apellido + ', ' + Colaboradores.Nombre) as 'Colaboradores'
+from Colaboradores
+    INNER JOIN Colaboraciones on Colaboraciones.IDColaborador = Colaboradores.ID
+    INNER JOIN Tareas on Colaboraciones.IDTarea = Tareas.ID
+    INNER JOIN Modulos on Modulos.ID = Tareas.IDModulo
+    INNER JOIN Proyectos on Proyectos.ID = Modulos.IDProyecto
+where Proyectos.Estado = 1
