@@ -100,13 +100,28 @@ GROUP by Modulos.ID,Modulos.Nombre, TiposTarea.Nombre
 
 --14 Por cada módulo, indicar su ID, apellido y nombre del colaborador y total que se le debe abonar en concepto de colaboraciones realizadas en dicho módulo.
 
-
+SELECT
+    Modulos.ID,modulos.Nombre, Colaboradores.Apellido, Colaboradores.Nombre, sum(colaboraciones.tiempo * Colaboraciones.PrecioHora) as 'honorarios'
+from modulos
+    inner join tareas on Modulos.ID = tareas.IDModulo
+    inner join Colaboraciones on tareas.ID = Colaboraciones.IDTarea
+    inner join Colaboradores on Colaboradores.ID = Colaboraciones.IDColaborador
+group by Modulos.ID,Modulos.Nombre ,Colaboradores.Nombre, Colaboradores.Apellido
 
 --15 Por cada proyecto indicar el nombre del proyecto y la cantidad de horas registradas en concepto de colaboraciones y el total que debe abonar en concepto de colaboraciones.
---16 Listar los nombres de los proyectos que hayan registrado menos de cinco
---colaboradores distintos y más de 100 horas total de trabajo.
---17 Listar los nombres de los proyectos que hayan comenzado en el año 2020 que
---hayan registrado más de tres módulos.
+
+select Proyectos.Nombre, sum(Colaboraciones.Tiempo), sum(Colaboraciones.PrecioHora * Colaboraciones.Tiempo)
+from Proyectos
+    inner join Modulos on Proyectos.ID = Modulos.IDProyecto
+    inner join tareas on Modulos.ID = tareas.IDModulo
+    inner join Colaboraciones on tareas.ID = Colaboraciones.IDTarea
+GROUP by Proyectos.Nombre
+
+--16 Listar los nombres de los proyectos que hayan registrado menos de cinco colaboradores distintos y más de 100 horas total de trabajo.
+
+
+
+--17 Listar los nombres de los proyectos que hayan comenzado en el año 2020 que hayan registrado más de tres módulos.
 --18 Listar para cada colaborador externo, el apellido y nombres y el tiempo
 --máximo de horas que ha trabajo en una colaboración.
 --19 Listar para cada colaborador interno, el apellido y nombres y el promedio
