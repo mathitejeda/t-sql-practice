@@ -1,14 +1,38 @@
 use blueprint
 
+go
 --1 Hacer un reporte que liste por cada tipo de tarea se liste el nombre, el precio de hora base y el promedio de valor hora real 
 --(obtenido de las colaboraciones).
 
+create view vw_tipos_tareas AS
+select
+    TT.Nombre,
+    TT.PrecioHoraBase,
+    (
+        select AVG(colab.PrecioHora)
+        from Colaboraciones as colab
+            inner join tareas on colab.IDTarea = Tareas.ID
+        where Tareas.IDTipo = TT.ID
+    ) as 'prom. Valor de hora'
+from TiposTarea as TT
 
+go
+
+select * from vw_tipos_tareas
+
+go
 
 --2 Modificar el reporte de (1) para que también liste una columna llamada Variación con las siguientes reglas:
 --Poca → Si la diferencia entre el promedio y el precio de hora base es menor a $500.
 --Mediana → Si la diferencia entre el promedio y el precio de hora base está entre $501 y $999.
 --Alta → Si la diferencia entre el promedio y el precio de hora base es $1000 o más.
+
+alter view vw_tipos_tareas as
+select
+from
+{
+
+}
 
 --3 Crear un procedimiento almacenado que liste las colaboraciones de un colaborador cuyo ID se envía como parámetro.
 
