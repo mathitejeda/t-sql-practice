@@ -28,6 +28,11 @@ create table tipos(
 GO
 
 create table tipo_por_pokemon(
-	numero bigint not null foreign key references pokemon(numero),
-	tipo int not null foreign key references tipos(idtipo)
+	numero bigint not null,
+	tipo int not null,
+	primary key(numero,tipo),
+	foreign key(numero) references pokemon(numero),
+	foreign key(tipo) references tipos(idtipo)
 )
+
+GO
