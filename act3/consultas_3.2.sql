@@ -106,16 +106,80 @@ GO
 --5.Hacer un trigger que al borrar un módulo realice una baja lógica del mismo en lugar de una baja física. Además, debe borrar todas las 
 --tareas asociadas al módulo.
 
+create TRIGGER TR_BAJA_MODULO on modulos
+instead of delete AS
+BEGIN
+    declare @IDModulo INT
+    select @IDModulo=ID from deleted
+    update modulos set Estado=0 where Modulos.ID=@IDModulo 
+    delete from tareas where Tareas.IDModulo=@IDModulo
+end
+
+GO
+
 --6.Hacer un trigger que al borrar un proyecto realice una baja lógica del mismo en lugar de una baja física. Además, debe borrar todas los 
 --módulos asociados al proyecto.
 
+CREATE TRIGGER TR_BAJA_PROYECTO on proyectos
+instead of delete AS
+BEGIN
+    declare @IDProyecto INT
+    select @IDProyecto=ID from deleted
+    --Modificar el proyecto para hacer la baja logica
+    UPDATE Proyectos set Estado=0 where ID=@IDProyecto
+
+    --Eliminar los modulos asociados
+    delete from modulos where IDProyecto=@IDProyecto
+END
+
+GO
 
 --7.Hacer un trigger que si se agrega una tarea cuya fecha de fin es mayor a la fecha estimada de fin del módulo asociado a la tarea 
 --entonces se modifique la fecha estimada de fin en el módulo.
 
+create trigger TR_FECHA_TAREA on tareas
+after insert AS
+BEGIN
+    declare @fechafin DATE
+    declare @FechaEstimada DATE
+    declare @IDtarea int 
+    declare @IDModulo int
+    select @fechafin=FechaFin from inserted
+    select @IDtarea=ID from inserted 
+    select @IDModulo=IDModulo from inserted
+
+    --Almacenamos la fecha estimada en una variable
+    select @FechaEstimada=M.FechaEstimadaFin
+    from Modulos as M
+    where M.ID=@IDModulo
+    --comparamos cual es mayor
+    if @fechafin>@FechaEstimada
+    BEGIN
+        --Si es mayor la fecha estimada se modifica
+        update Modulos set FechaEstimadaFin=@fechafin where ID=@IDModulo
+    END
+END
+
+GO
 
 --8.Hacer un trigger que al borrar una tarea que previamente se ha dado de baja lógica realice la baja física de la misma.
 
+create trigger TR_BAJA_DEFINITIVA_TAREA on tareas
+after delete as
+BEGIN
+    declare @idtarea INT
+    declare @estadoTarea bit
+    select @idtarea=ID from inserted
+    select @estadoTarea=Estado from inserted
+
+    --checkeamos si existe una baja logica previa
+    if @estadoTarea = 0
+    BEGIN
+        delete from tareas where ID=@idtarea
+    END 
+    else 
+        RAISERROR('Debe realizarse una baja logica',16,1)
+END
 
 --9.Hacer un trigger que al ingresar una colaboración no permita que el colaborador/a superponga las fechas con las de otras colaboraciones 
 --que se les hayan asignado anteriormente. En caso contrario, registrar la colaboración sino generar un error con un mensaje aclaratorio.
