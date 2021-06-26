@@ -9,7 +9,8 @@ after insert
 as
 BEGIN
     declare @IDTarea int
-    select @IDTarea= IDTarea from inserted
+    select @IDTarea= IDTarea
+    from inserted
     declare @IDColaborador INT
     SELECT @IDColaborador=IDColaborador
     from inserted
@@ -17,7 +18,7 @@ BEGIN
     declare @precio money
     select @precio=TT.PrecioHoraBase
     from TiposTarea  as TT
-    inner join tareas as T on TT.ID=T.IDTipo
+        inner join tareas as T on TT.ID=T.IDTipo
     where T.ID=@IDTarea
 
     --Si el colaborador es externo aumentar 20%
@@ -25,9 +26,10 @@ BEGIN
     select @TipoColab=C.tipo
     from Colaboradores as C
     where C.ID=@IDColaborador
-    
+
     if @TipoColab='E'begin
-    set @precio=@precio*1.2 end
+        set @precio=@precio*1.2
+    end
 
     update Colaboraciones set PrecioHora=@precio
     where IDColaborador=@IDColaborador and IDTarea=@IDTarea
@@ -46,21 +48,26 @@ BEGIN
     declare @IDTarea INT
     declare @FechaTarea DATE
     declare @cantTareas int
-    select @IDColaborador=IDColaborador from inserted
-    select @IDTarea=IDTarea from inserted
+    select @IDColaborador=IDColaborador
+    from inserted
+    select @IDTarea=IDTarea
+    from inserted
 
     --determinar fecha de la tarea
-    select @FechaTarea=FechaInicio from tareas where tareas.ID=@IDTarea
-    
+    select @FechaTarea=FechaInicio
+    from tareas
+    where tareas.ID=@IDTarea
+
     --determinar cantidad de tareas
-    select @cantTareas=COUNT(C.IDTarea) from Colaboraciones as C
-    inner join tareas as T on T.ID = C.IDTarea
+    select @cantTareas=COUNT(C.IDTarea)
+    from Colaboraciones as C
+        inner join tareas as T on T.ID = C.IDTarea
     where MONTH(T.FechaInicio)=MONTH(@FechaTarea) and YEAR(T.FechaInicio)=YEAR(@FechaTarea)
-    and C.IDColaborador=@IDColaborador
+        and C.IDColaborador=@IDColaborador
 
     --finally
     if @cantTareas>15 BEGIN
-        DELETE from Colaboraciones where Colaboraciones.IDColaborador=@IDColaborador and IDTarea=@IDTarea 
+        DELETE from Colaboraciones where Colaboraciones.IDColaborador=@IDColaborador and IDTarea=@IDTarea
         RAISERROR('No se pueden registrar mas de 15 colaboraciones en un mes',1,16)
     END
 end
@@ -75,18 +82,25 @@ create TRIGGER TR_TAREA_PROGRAMACION on tareas
 after insert as
 begin
     declare @IDModulo int
-    declare @IDTipo int 
-    select @IDModulo=IDModulo from inserted
-    select @IDTipo=IDTipo from inserted
+    declare @IDTipo int
+    select @IDModulo=IDModulo
+    from inserted
+    select @IDTipo=IDTipo
+    from inserted
     declare @Tipo varchar(50)
     --Almacenar el nombre de la tarea en una variable
-    select @Tipo=TT.Nombre from TiposTarea as TT
+    select @Tipo=TT.Nombre
+    from TiposTarea as TT
     where TT.ID=@IDTipo
     --checkear si el tipo de tarea es programacion
     if @Tipo like '%programación%' 
     begin
-        insert into tareas(IDModulo,IDTipo) values(@IDModulo,10)
-        insert into tareas(IDModulo,IDTipo) values(@IDModulo,11)
+        insert into tareas
+            (IDModulo,IDTipo)
+        values(@IDModulo, 10)
+        insert into tareas
+            (IDModulo,IDTipo)
+        values(@IDModulo, 11)
     end
 end 
 
@@ -97,7 +111,8 @@ create TRIGGER TR_BORRAR_TAREA on tareas
 instead of DELETE
 as begin
     declare @IDTarea INT
-    select @IDTarea=ID from deleted
+    select @IDTarea=ID
+    from deleted
 
     UPDATE Tareas set Estado=0 where id=@IDTarea
 end
@@ -110,8 +125,9 @@ create TRIGGER TR_BAJA_MODULO on modulos
 instead of delete AS
 BEGIN
     declare @IDModulo INT
-    select @IDModulo=ID from deleted
-    update modulos set Estado=0 where Modulos.ID=@IDModulo 
+    select @IDModulo=ID
+    from deleted
+    update modulos set Estado=0 where Modulos.ID=@IDModulo
     delete from tareas where Tareas.IDModulo=@IDModulo
 end
 
@@ -124,7 +140,8 @@ CREATE TRIGGER TR_BAJA_PROYECTO on proyectos
 instead of delete AS
 BEGIN
     declare @IDProyecto INT
-    select @IDProyecto=ID from deleted
+    select @IDProyecto=ID
+    from deleted
     --Modificar el proyecto para hacer la baja logica
     UPDATE Proyectos set Estado=0 where ID=@IDProyecto
 
@@ -142,11 +159,14 @@ after insert AS
 BEGIN
     declare @fechafin DATE
     declare @FechaEstimada DATE
-    declare @IDtarea int 
+    declare @IDtarea int
     declare @IDModulo int
-    select @fechafin=FechaFin from inserted
-    select @IDtarea=ID from inserted 
-    select @IDModulo=IDModulo from inserted
+    select @fechafin=FechaFin
+    from inserted
+    select @IDtarea=ID
+    from inserted
+    select @IDModulo=IDModulo
+    from inserted
 
     --Almacenamos la fecha estimada en una variable
     select @FechaEstimada=M.FechaEstimadaFin
@@ -169,8 +189,10 @@ after delete as
 BEGIN
     declare @idtarea INT
     declare @estadoTarea bit
-    select @idtarea=ID from inserted
-    select @estadoTarea=Estado from inserted
+    select @idtarea=ID
+    from inserted
+    select @estadoTarea=Estado
+    from inserted
 
     --checkeamos si existe una baja logica previa
     if @estadoTarea = 0
@@ -181,9 +203,81 @@ BEGIN
         RAISERROR('Debe realizarse una baja logica',16,1)
 END
 
---9.Hacer un trigger que al ingresar una colaboración no permita que el colaborador/a superponga las fechas con las de otras colaboraciones 
---que se les hayan asignado anteriormente. En caso contrario, registrar la colaboración sino generar un error con un mensaje aclaratorio.
+GO
 
+--9.Hacer un trigger que al ingresar una colaboración no permita que el colaborador/a superponga las fechas con las de otras colaboraciones 
+--que se les hayan asignado anteriormente. En caso contrario,no registrar la colaboración sino generar un error con un mensaje aclaratorio.
+
+create trigger TR_COLABORACIONES_FECHA on colaboraciones
+after insert AS
+BEGIN
+    --Declaracion de variables
+    declare @IDTarea int
+    declare @fechaColaboracion DATE
+    --Asignaciones
+    select @IDTarea=IDTarea
+    from inserted
+
+    select @fechaColaboracion=FechaInicio
+    from Tareas as T
+    where T.ID=@IDTarea
+
+
+END
+
+GO
 
 --10.Hacer un trigger que al modificar el precio hora base de un tipo de tarea registre en una tabla llamada HistorialPreciosTiposTarea el ID, 
 --el precio antes de modificarse y la fecha de modificación. NOTA: La tabla debe estar creada previamente. NO crearla dentro del trigger.
+
+create table HistorialPreciosTiposTarea
+(
+    ID int PRIMARY key IDENTITY(1,1),
+    IDTarea smallint FOREIGN KEY references tipostarea(ID) not null,
+    precioAnterior money not NULL,
+    fechaModificacion date not null
+)
+
+ GO
+
+create TRIGGER TR_MODIFICAR_PH on TiposTarea
+ instead of UPDATE as
+ BEGIN
+    --D
+    declare @PrecioAnterior money
+    declare @NuevoPrecio money
+    declare @IDTipo int
+    declare @fechaModificacion date
+    --a
+    select @IDTipo=ID
+    from inserted
+
+    select @fechaModificacion=GETDATE()
+
+    select @PrecioAnterior=PrecioHoraBase
+    from TiposTarea
+    where ID=@IDTipo
+
+    select @NuevoPrecio=PrecioHoraBase
+    from inserted
+
+    --Insercion del valor anterior
+    insert into HistorialPreciosTiposTarea
+        (IDTarea,precioAnterior,fechaModificacion)
+    values(@IDTipo, @PrecioAnterior, @fechaModificacion)
+    --Actualizacion del precio
+    update TiposTarea set PrecioHoraBase=@NuevoPrecio where ID=@IDTipo
+END
+
+ Go
+
+
+select *
+from HistorialPreciosTiposTarea
+select *
+from TiposTarea
+update TiposTarea set PrecioHoraBase=4500 where id=1
+select *
+from HistorialPreciosTiposTarea
+select *
+from TiposTarea
